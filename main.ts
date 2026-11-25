@@ -24,9 +24,7 @@ const MAX_CHARS = 240;
 const OUTPUT_DIR = "/output";
 const OUTPUT_PATH = `${OUTPUT_DIR}/entry.txt`;
 
-function main(): void {
-  const text = PITCH.trim();
-
+function validateEntry(text: string): void {
   // Gate check, mirroring the competition's own gate: 1–240 chars.
   if (text.length < 1 || text.length > MAX_CHARS) {
     throw new Error(
@@ -36,6 +34,16 @@ function main(): void {
   if (text !== PITCH) {
     throw new Error("entry changed after trimming; refusing to write it");
   }
+  // The pitch must be a single sentence on one line: no embedded
+  // newlines, which would break the one-sentence gate downstream.
+  if (text.includes("\n") || text.includes("\r")) {
+    throw new Error("entry must be a single line with no line breaks");
+  }
+}
+
+function main(): void {
+  const text = PITCH.trim();
+  validateEntry(text);
 
   mkdirSync(OUTPUT_DIR, { recursive: true });
   // No trailing newline: the file holds exactly the one sentence.
